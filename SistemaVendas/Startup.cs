@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SistemaVendas.Models;
 using SistemaVendas.Data;
+using SistemaVendas.Services;
 
 namespace SistemaVendas
 {
@@ -42,6 +43,7 @@ namespace SistemaVendas
                     builder.MigrationsAssembly("SistemaVendas")));
 
             services.AddScoped<SeedingService>();
+            services.AddScoped<SellerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
