@@ -2,8 +2,10 @@
 using SistemaVendas.Models;
 using SistemaVendas.Models.ViewModels;
 using SistemaVendas.Services;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 
 namespace SistemaVendas.Controllers
 {
@@ -42,12 +44,12 @@ namespace SistemaVendas.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Escolha um vendedor" });
             }
             var obj = _sellerService.FindById(id.Value);
             if(obj == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Esse vendedor não existe" });
             }
             return View(obj);
         }
@@ -62,12 +64,12 @@ namespace SistemaVendas.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Esse vendedor não existe" });
             }
             var obj = _sellerService.FindById(id.Value);
             if (obj == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Esse vendedor não existe" });
             }
             return View(obj);
         }
@@ -75,12 +77,12 @@ namespace SistemaVendas.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Esse vendedor não existe" });
             }
             var obj = _sellerService.FindById(id.Value);
             if (obj == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Esse vendedor não existe" });
             }
             List<Department> departments = _departmentService.FindAll();
             SellerFormViewModel viewModel = new SellerFormViewModel { Seller = obj, Departments = departments };
@@ -92,21 +94,25 @@ namespace SistemaVendas.Controllers
         {
             if(id != seller.Id)
             {
-                return BadRequest();
+                return RedirectToAction(nameof(Error), new { message = "Identificação não corresponde ao vendedor" });
             }
             try
             {
                 _sellerService.Update(seller);
                 return RedirectToAction(nameof(Index));
             }
-            catch (KeyNotFoundException)
+            catch (ApplicationException e)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = e.Message});
             }
-            catch (DBConcurrencyException)
+        }
+        public IActionResult Error(string message)
+        {
+            var viewModel = new ErrorViewModel
             {
-                return BadRequest();
-            }
+                Message = message, RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            };
+            return View(viewModel);
         }
     }
 }
