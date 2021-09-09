@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SistemaVendas.Models;
 using SistemaVendas.Models.ViewModels;
 using SistemaVendas.Services;
+using SistemaVendas.Services.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -53,7 +55,7 @@ namespace SistemaVendas.Controllers
                 return RedirectToAction(nameof(Error), new { message = "Escolha um vendedor" });
             }
             var obj = await _sellerService.FindByIdAsync(id.Value);
-            if(obj == null)
+            if (obj == null)
             {
                 return RedirectToAction(nameof(Error), new { message = "Esse vendedor não existe" });
             }
@@ -63,8 +65,15 @@ namespace SistemaVendas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            await _sellerService.RemoveAsync(id);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _sellerService.RemoveAsync(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (IntegrityException e)
+            {
+                return RedirectToAction(nameof(Error), new { message = e.Message });
+            }
         }
         public async Task<IActionResult> Details(int? id)
         {
@@ -90,7 +99,7 @@ namespace SistemaVendas.Controllers
             {
                 return RedirectToAction(nameof(Error), new { message = "Esse vendedor não existe" });
             }
-            List<Department> departments = await  _departmentService.FindAllAsync();
+            List<Department> departments = await _departmentService.FindAllAsync();
             SellerFormViewModel viewModel = new SellerFormViewModel { Seller = obj, Departments = departments };
             return View(viewModel);
         }
@@ -115,14 +124,15 @@ namespace SistemaVendas.Controllers
             }
             catch (ApplicationException e)
             {
-                return RedirectToAction(nameof(Error), new { message = e.Message});
+                return RedirectToAction(nameof(Error), new { message = e.Message });
             }
         }
         public IActionResult Error(string message)
         {
             var viewModel = new ErrorViewModel
             {
-                Message = message, RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+                Message = message,
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
             };
             return View(viewModel);
         }
