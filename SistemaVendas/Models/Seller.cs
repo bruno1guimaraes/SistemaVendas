@@ -9,6 +9,8 @@ namespace SistemaVendas.Models
     {
         public int Id { get; set; }
         [Display(Name = "Nome")]
+        [Required]
+        [StringLength(60, MinimumLength = 3, ErrorMessage = "{0}Nome deve ter mais de {2} e menos de {1} Caracteres.")]
         public string Name { get; set; }
         [Display(Name = "e-Mail")]
         [DataType(DataType.EmailAddress)]
