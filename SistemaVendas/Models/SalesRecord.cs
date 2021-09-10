@@ -6,10 +6,13 @@ namespace SistemaVendas.Models
 {
     public class SalesRecord
     {
+        
         public int Id { get; set; }
         [Display(Name = "Data da venda")]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime Date { get; set; }
         [Display(Name = "Valor Total")]
+        [DisplayFormat(DataFormatString = "{0:F2}")]
         public double Amount { get; set; }
         [Display(Name = "Situação do pedido")]
         public SaleStatus Status { get; set; }
